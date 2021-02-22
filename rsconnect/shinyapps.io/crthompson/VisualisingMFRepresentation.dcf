@@ -1,0 +1,13 @@
+name: VisualisingMFRepresentation
+title: VisualisingMFRepresentation
+username:
+account: crthompson
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3635465
+bundleId: 4222482
+url: https://cararthompson.shinyapps.io/VisualisingMFRepresentation/
+when: 1613334086.64546
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: genderText.nb.html|S2-1.txt|S2-2.txt

@@ -1,0 +1,318 @@
+---
+title: "Visualising Male and Female Representation in Text"
+author: "Analysis and DataViz by Cara Thompson"
+output: 
+  html_document:
+    toc: false
+    number_sections: false
+    highlight: tango
+params:
+  extract: NA
+  n_topics: NA
+---
+
+```{r setup, include=FALSE, echo = F}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, fig.align = "center", fig.height = 4.5)
+```
+
+
+<!-- ```{css, echo=FALSE} -->
+<!-- body{ -->
+<!--   font-family: Roboto; -->
+<!--   font-size: 12pt; -->
+<!-- } -->
+<!-- ``` -->
+
+This report is a summary of the analysis of the text you entered on `r format(Sys.Date(),  "%A %d %B %Y")` into the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/GenderRep/). The first sentence of your text was: 
+
+```{r sentence1}
+get_sentence <- sentence_analysis(params$extract) %>%
+  mutate(text = as.character(text)) %>%
+  filter(index == 1) 
+
+get_sentence[["text"]]
+```
+
+In reviewing this analysis, remember that the aim is not to force a perfect balance (there may be a perfectly valid reason why you have more predominantly Female sentences, for example if the main character in your text is Female). The aim is to allow writers and speakers to see the balance within their text, and take steps to redress it where necessary.
+
+## Gender representation
+
+### What was the proportion of words referring to Males and Females in each of your sentences?
+
+Each square represents a sentence from your text. The colour of each square is determined by counting how many explicitly Male and Female words were in each sentence. Sentences which didn't contain any Male or Female words are grey. Those with a mix of the two are purple. The higher the proportion of Female vs. Male words, the more pink the square is; the higher the proportion of Male vs. Female words, the more blue the square is. Throughout the text in this app, a \"predominantly Female sentence\" is one in which the proportion of Females mentioned in the sentence was higher than the proportion of Males.
+
+```{r gender_waffle}
+ggplot(sentence_analysis(params$extract)) +
+  geom_tile(aes(x = x, y = y, fill = predG),
+            color = "white", size = 2) +
+  coord_equal() +
+  theme_minimal() +
+  scale_fill_gradient(
+    low = fColour,
+    high = mColour,
+    limits=c(0,1),
+    na.value = "grey48") +
+  guides(fill = guide_colourbar(title = "If the square representing the sentence isn't grey, the sentence is\npredominantly Female  \u2190  -  \u2192  predominantly Male",
+                                title.position = "top",
+                                title.hjust = 0.5,
+                                label = F,
+                                ticks = F,
+                                barwidth = 30)) +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 16),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_blank())
+```
+
+### Which words were associated with predominantly Female, Neutral, and predominantly Male sentences?
+
+The bigger the word, the more often it featured in your text. If your text is very long, only the most frequent words will be shown. If the wordcloud for any given gender just says \"N/A\", the app didn't classify any sentences as predominantly featuring that gender. 
+
+```{r gender_clouds}
+
+wordsdf <- sentence_analysis(params$extract) %>%
+  mutate(text = as.vector(text)) %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words) %>%
+  mutate(factorG = factor(ifelse(factorG == "NaN", "Neutral", as.character(factorG)),
+                          levels = c("Female", "Neutral", "Male"))) %>%
+  group_by(factorG) %>%
+  count(word) %>%
+  # To allow binding with new level
+  mutate(factorG = as.character(factorG)) %>%
+  filter(word != "") %>%
+  arrange(desc(n))
+
+for(gender in c("Female", "Male", "Neutral")) {
+  # want a cloud for each even if there are no words,
+  # so create N/A input so that there is a cloud that just
+  # says N/A if necessary
+  if (!any(grepl(gender, wordsdf$factorG))) {
+    wordsdf <- rbind.data.frame(wordsdf,
+                                c(factorG = gender,
+                                  word = "N/A",
+                                  n = 2))
+  }
+}
+
+wordsdf$factorG <- factor(wordsdf$factorG,
+                          levels = c("Female", "Neutral", "Male"))
+
+# Facet labels, to reduce confusion (e.g. "That's not a male word" for words used in "male" sentences)
+factorGLabs <- c("Predominantly Female\nSentences", 
+                 "Neutral\nSentences", 
+                 "Predominantly Male\nSentences")
+names(factorGLabs) <- c("Female", "Neutral", "Male")
+
+ggplot(wordsdf, aes(label = word, colour = factorG, size = as.numeric(n))) +
+  geom_text_wordcloud_area(shape = "circle", rm_outside = T) +
+  facet_wrap(~factorG,
+             labeller = labeller(factorG = factorGLabs)) +
+  scale_radius(range = c(5, 20), limits = c(0, NA)) +
+  scale_color_manual(breaks = c("Female", "Male", "Neutral"),
+                     values=c(fColour, mColour, "grey48")) +
+  theme_minimal() +
+  theme(strip.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 12))
+```
+
+## Sentiment analysis
+
+### Which emotions were associated with the words in the predominantly Female, predominantly Male and Neutral sentences?
+
+Using the sentence split performed in the Gender Balance tab, this first graph shows the emotions associated with words in each of the three sentence groups. The emotions associated with each word are taken from the commonly used NCR lexicon. 
+
+```{r sa_static}
+wordsdf <- sentence_analysis(params$extract) %>%
+  mutate(text = as.vector(text)) %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words) %>%
+  mutate(factorG = factor(ifelse(factorG == "NaN", "Neutral", as.character(factorG)),
+                          levels = c("Female", "Neutral", "Male"))) %>%
+  group_by(factorG) %>%
+  count(word) %>%
+  # To allow binding with new level
+  mutate(factorG = as.character(factorG)) %>%
+  filter(word != "") %>%
+  arrange(desc(n))
+
+for(gender in c("Female", "Male", "Neutral")) {
+  # want a facet for each even if there are no words
+  if (!any(grepl(gender, wordsdf$factorG))) {
+    wordsdf <- rbind.data.frame(wordsdf,
+                                c(factorG = gender,
+                                  word = "N/A",
+                                  n = 2))
+  }
+}
+
+wordsdf$factorG <- factor(wordsdf$factorG,
+                          levels = c("Female", "Neutral", "Male"))
+
+wordsSentiments <- wordsdf %>%
+  inner_join(ncr_tibble) %>%
+  group_by(factorG) %>%
+  add_count(sentiment, name = "sentiment_count") %>%
+  ungroup() %>%
+  # to order by most used sentiment across all genders
+  arrange(desc(gender), desc(sentiment_count)) %>%
+  mutate(factorS = factor(sentiment, levels = unique(sentiment))) %>%
+  group_by(factorG, sentiment) %>%
+  mutate(associated_words = paste(unique(word), collapse = ", ")) %>%
+  select(factorG, factorS, sentiment, sentiment_count, associated_words) %>%
+  unique()
+
+ggplot(filter(wordsSentiments, !is.na(factorS))) +
+  scale_fill_manual(breaks = c("Female", "Male", "Neutral"),
+                    values=c(fColour, mColour, "grey48")) +
+  geom_col(inherit.aes = F, data = wordsSentiments,
+           aes(x = fct_rev(factorS), y = sentiment_count, 
+               fill = factorG,
+               text = paste0("Associated word(s):<br>", associated_words)), 
+           show.legend = F) +
+  scale_x_discrete() +
+  coord_flip() +
+  facet_grid(~factorG, drop = F) +
+  labs(y = "Word count per emotion \n(note that some words count towards several emotions)",
+       x = "") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(strip.text.x = element_text(size = 16),
+        strip.text.y = element_text(size = 24))
+
+```
+
+### How do the emotions evolve throughout your text?
+
+Using the AFINN lexicon, which assigns a score from -5 to +5 to words according to how negative or positive the emotions associated with that word are, this next graph shows a negative to positive emotional score for each sentence in your text. In assigning these scores, the immediate context of each word was taken into account (e.g. \"not happy\" has a negative score but \"happy\" has a positive score). The sentences are coloured according to the relative proportions of Male and Female words contained within them, to allow you to visualise not only the progression of emotions through your text but also any associations between the predominant gender of your sentences and the positive or negative emotions they convey.
+
+```{r sa_evolution}
+sentiment_summary <- sentence_analysis(params$extract) %>%
+  mutate(text = as.vector(text)) %>%
+  unnest_tokens(token = "ngrams", n = 2, bigram, text) %>%
+  separate(bigram, c("previous_word", "word"), sep = " ") %>%
+  anti_join(stop_words) %>%
+  mutate(factorG = factor(ifelse(factorG == "NaN", "Neutral", as.character(factorG)),
+                          levels = c("Female", "Neutral", "Male")),
+         coef = ifelse(previous_word %in% c("not", "no", "never"),
+                       -1,
+                       1)) %>%
+  inner_join(afinn_tibble) %>%
+  mutate(sentiment_value = value * coef) %>%
+  group_by(id) %>%
+  summarise(sentence_sentiment = sum(sentiment_value))
+
+sentiment_sentences <- sentence_analysis(params$extract) %>%
+  mutate(text = as.character(text)) %>%
+  left_join(sentiment_summary, by = "id") %>%
+  mutate(sentence_sentiment = ifelse(is.na(sentence_sentiment), 
+                                     0,
+                                     sentence_sentiment))
+
+ggplot(sentiment_sentences) +
+  geom_col(aes(x = id, y = sentence_sentiment, 
+               fill = predG, colour = predG), 
+           size = 1.2,
+           width = 0.8) +
+  scale_colour_gradient(
+    low = fColour,
+    high = mColour,
+    limits=c(0,1),
+    na.value = "grey48",
+    guide = "none") +
+  labs(y = "Positive/negative emotional score",
+       x = "") +
+  theme_minimal() +
+  scale_fill_gradient(
+    low = fColour,
+    high = mColour,
+    limits=c(0,1),
+    na.value = "grey48") +
+  xlim(c(0, max(sentiment_sentences$id))) +
+  guides(fill = guide_colourbar(title = "If the bar representing the sentence isn't grey, the sentence is\npredominantly Female  \u2190  -  \u2192  Predominantly Male",
+                                title.position = "top",
+                                title.hjust = 0.5,
+                                title.vjust = 0.5,
+                                label = F,
+                                ticks = F,
+                                barwidth = 30)) +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 16),
+        axis.text.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 16))
+
+```
+
+## Topic analysis: How did your words cluster into topics, and what type of sentences did they feature in?"
+
+Using Latent Dirichlet allocation (LDA), one of the most widely used algorithms for topic modelling, this section presents a series of wordclouds of the top 10 words in each word cluster (topic) in your text. The number of clusters comes from the number of topics you selected in the dropdown menu. You selected `r params$n_topics` topics. 
+
+These wordclouds also allow you to explore gender balance in the topics, by colour coding each word according to whether it featured in neutral sentences only (grey words), sentences in which there as a higher proportion of Male words, or sentences in which there was a higher proportion of Female words. If one of your important topics is mostly one gender colour, you may wish to revisit the sentences in which it is explored."
+
+```{r topics}
+wordsdf <- sentence_analysis(params$extract) %>%
+  mutate(text = as.vector(text)) %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words) 
+
+doc_matrix <- wordsdf %>%
+  group_by(word) %>%
+  tally() %>%
+  # cast_dtm() needs a document ID
+  mutate(doc = rep("1", length(unique(word)))) %>%
+  cast_dtm(doc, word, n)
+
+doc_lda <- topicmodels::LDA(doc_matrix,
+                            k = ifelse(params$n_topics != "NA",
+                                       as.numeric(as.character(params$n_topics)),
+                                       # setting arbitrarily, they can change it 
+                                       # according to what comes out
+                                       3),
+                            control = list(seed = 1234)) 
+
+doc_lda_tibble <- tidytext::tidy(doc_lda) %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  rename(word = term)
+
+doc_lda_tibble %>% inner_join(wordsdf) %>%
+  group_by(word, topic) %>%
+  summarise(meanPredG = mean(predG, na.rm = T),
+            meanBeta = mean(beta, na.rm = T)) %>%
+  mutate(topic_label = paste0("Topic ", topic)) %>%
+  ggplot(aes(label = word, colour = meanPredG, 
+             size = meanBeta)) +
+  geom_text_wordcloud_area(shape = "circle", 
+                           rm_outside = F,
+                           show.legend = T) +
+  facet_wrap(~topic_label,
+             ncol = 2) +
+  scale_radius(range = c(5, 20), limits = c(0, NA)) +
+  scale_colour_gradient(
+    low = fColour,
+    high = mColour,
+    limits = c(0,1),
+    na.value = "grey48") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 16),
+        strip.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 12)) +
+  guides(colour = guide_colourbar(title = 
+                                    "If a word is not grey, the sentences in which it featured were\npredominantly Female  \u2190    -    \u2192  predominantly Male",
+                                  title.position = "top",
+                                  title.vjust = 0.5, 
+                                  title.hjust = 0.5,
+                                  label = F,
+                                  ticks = F,
+                                  barwidth = 30),
+         size = F)
+```
+
+Thank you for using the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/GenderRep/). I hope you found it useful!
+
+Cara Thompson (twitter: @cararthompson)

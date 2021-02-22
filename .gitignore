@@ -1,0 +1,8 @@
+# USAS lists
+S2-1.txt
+S2-1_mod.txt
+S2-2.txt
+S2-2_mod.txt
+
+# AFINN and NRC lexicons
+sentiment_tibbles.RData
