@@ -149,17 +149,18 @@ shinyServer(function(input, output) {
     
     wordsdf$factorG <- factor(wordsdf$factorG,
                               levels = c("Female", "Neutral", "Male"))
-    
+  
     wordsSentiments <- wordsdf %>%
       inner_join(ncr_tibble) %>%
-      group_by(factorG) %>%
-      add_count(sentiment, name = "sentiment_count") %>%
+      group_by(factorG, sentiment) %>%
+      mutate(sentiment_count = sum(as.numeric(as.character(n))),
+             word_count_per_SG = paste0(word, " (", n, ")")) %>%
       ungroup() %>%
       # to order by most used sentiment across all genders
-      arrange(desc(gender), desc(sentiment_count)) %>%
+      arrange(desc(sentiment_count)) %>%
       mutate(factorS = factor(sentiment, levels = unique(sentiment))) %>%
       group_by(factorG, sentiment) %>%
-      mutate(associated_words = paste(unique(word), collapse = ", ")) %>%
+      mutate(associated_words = paste(unique(word_count_per_SG), collapse = ", ")) %>%
       select(factorG, factorS, sentiment, sentiment_count, associated_words) %>%
       unique()
     
