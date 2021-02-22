@@ -1,13 +1,4 @@
-# Aux functions and library set up for the ap
-
-## Example text outside of App
-# input <- list()
-# input$extract <- "He was there and did blah. She was also! They were happy...
-# She gave him their joint gift. Hurrah! She laughed. What would happen next? Who knows.
-# He said this, he said that, he did blah. She laughed again.
-# She, her, hers, him.
-# The guys did X. The girls didn't Y. The men and women chatted together. She was super happy. He was very depressed"
-
+# Aux functions and library set up for the app
 
 # Load packages
 library(tidyverse)
@@ -19,6 +10,7 @@ library(ggpol)
 library(ggnewscale)
 library(reshape2)
 library(textdata)
+library(kableExtra)
 
 # Set up for text analysis
 m_list <- c(tolower(read_table("S2-2_mod.txt", col_names = F)[["X1"]]),
