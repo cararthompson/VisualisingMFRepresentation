@@ -1,8 +1,9 @@
-# USAS lists
+# USAS lists, which I don't have permission to share
 S2-1.txt
 S2-1_mod.txt
 S2-2.txt
 S2-2_mod.txt
 
-# AFINN and NRC lexicons
+# AFINN and NRC lexicons, which I quote in the text of the app
+# as per the requirement when loading the lexicons via tidytext
 sentiment_tibbles.RData
