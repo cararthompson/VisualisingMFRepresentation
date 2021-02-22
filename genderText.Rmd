@@ -51,7 +51,7 @@ ggplot(sentence_analysis(params$extract)) +
                                 ticks = F,
                                 barwidth = 30)) +
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 16),
+        legend.title = element_text(size = 14),
         axis.title = element_blank(),
         axis.text = element_blank(),
         panel.grid = element_blank())
@@ -238,7 +238,7 @@ ggplot(sentiment_sentences) +
                                 ticks = F,
                                 barwidth = 30)) +
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 16),
+        legend.title = element_text(size = 14),
         axis.text.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
@@ -305,9 +305,9 @@ doc_lda_tibble %>% inner_join(wordsdf) %>%
     na.value = "grey48") +
   theme_minimal() +
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 16),
+        legend.title = element_text(size = 14),
         strip.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 12)) +
+        axis.text.y = element_text(size = 10)) +
   guides(colour = guide_colourbar(title = 
                                     "If a word is not grey, the sentences in which it featured were\npredominantly Female  \u2190    -    \u2192  predominantly Male",
                                   title.position = "top",
