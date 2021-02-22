@@ -15,14 +15,6 @@ params:
 knitr::opts_chunk$set(echo = F, warning = F, message = F, fig.align = "center", fig.height = 4.5)
 ```
 
-
-<!-- ```{css, echo=FALSE} -->
-<!-- body{ -->
-<!--   font-family: Roboto; -->
-<!--   font-size: 12pt; -->
-<!-- } -->
-<!-- ``` -->
-
 This report is a summary of the analysis of the text you entered on `r format(Sys.Date(),  "%A %d %B %Y")` into the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/GenderRep/). The first sentence of your text was: 
 
 ```{r sentence1}
@@ -121,7 +113,7 @@ ggplot(wordsdf, aes(label = word, colour = factorG, size = as.numeric(n))) +
 
 ### Which emotions were associated with the words in the predominantly Female, predominantly Male and Neutral sentences?
 
-Using the sentence split performed in the Gender Balance tab, this first graph shows the emotions associated with words in each of the three sentence groups. The emotions associated with each word are taken from the commonly used NCR lexicon. 
+Using the sentence split performed in the Gender Balance tab, this first graph shows the emotions associated with words in each of the three sentence groups. The emotions associated with each word are taken from the commonly used NRC lexicon. 
 
 ```{r sa_static}
 wordsdf <- sentence_analysis(params$extract) %>%
@@ -180,6 +172,14 @@ ggplot(filter(wordsSentiments, !is.na(factorS))) +
   theme(legend.position = "none") +
   theme(strip.text.x = element_text(size = 16),
         strip.text.y = element_text(size = 24))
+
+```
+
+The table below shows the words associated with each sentiment, in predominantly Male, predominantly Female and Neutral sentences.
+
+```{r sentiment_table}
+
+# TODO
 
 ```
 
@@ -242,8 +242,8 @@ ggplot(sentiment_sentences) +
         axis.text.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
-        axis.text.y = element_text(size = 12),
-        axis.title.y = element_text(size = 16))
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_text(size = 12))
 
 ```
 
@@ -253,7 +253,17 @@ Using Latent Dirichlet allocation (LDA), one of the most widely used algorithms 
 
 These wordclouds also allow you to explore gender balance in the topics, by colour coding each word according to whether it featured in neutral sentences only (grey words), sentences in which there as a higher proportion of Male words, or sentences in which there was a higher proportion of Female words. If one of your important topics is mostly one gender colour, you may wish to revisit the sentences in which it is explored."
 
-```{r topics}
+```{r,echo=FALSE}
+n_topics <- ifelse(params$n_topics != "NA",
+                   as.numeric(as.character(params$n_topics)),
+                   # setting arbitrarily, they can change it 
+                   # according to what comes out
+                   3)
+topic_fig_height <- ceiling(n_topics/2 * 4.5)
+```
+
+
+```{r topics, fig.height = topic_fig_height}
 wordsdf <- sentence_analysis(params$extract) %>%
   mutate(text = as.vector(text)) %>%
   unnest_tokens(word, text) %>%
@@ -267,11 +277,7 @@ doc_matrix <- wordsdf %>%
   cast_dtm(doc, word, n)
 
 doc_lda <- topicmodels::LDA(doc_matrix,
-                            k = ifelse(params$n_topics != "NA",
-                                       as.numeric(as.character(params$n_topics)),
-                                       # setting arbitrarily, they can change it 
-                                       # according to what comes out
-                                       3),
+                            k = n_topics,
                             control = list(seed = 1234)) 
 
 doc_lda_tibble <- tidytext::tidy(doc_lda) %>%
