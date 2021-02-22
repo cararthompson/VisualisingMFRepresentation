@@ -154,7 +154,7 @@ shinyServer(function(input, output) {
       inner_join(ncr_tibble) %>%
       group_by(factorG, sentiment) %>%
       mutate(sentiment_count = sum(as.numeric(as.character(n))),
-             word_count_per_SG = paste0(word, " (", n, ")")) %>%
+             word_count_per_SG = paste0(word, " (x", n, ")")) %>%
       ungroup() %>%
       # to order by most used sentiment across all genders
       arrange(desc(sentiment_count)) %>%

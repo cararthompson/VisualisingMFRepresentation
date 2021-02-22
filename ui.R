@@ -113,7 +113,8 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                              associated with each word are taken from the commonly used ",
                                              tags$a(href = "https://www.saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm",
                                                     "NRC lexicon. "),
-                                             "As you hover over each bar, the app shows you which words the lexicon associated with each emotion. 
+                                             "As you hover over each bar, the app shows you which words the lexicon associated with each emotion (and, 
+                                             in brackets, how many times each of those words were used within each sentence group). 
                                              Use this feature to see for yourself whether you think the words have been appropriately classified. 
                                              For example, if you copy the text from this page, you will see that many of the negative emotions are 
                                              tied to the NRC lexicon's interpretation of the word \"sentence\"."),
