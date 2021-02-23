@@ -85,26 +85,26 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                                                of Male vs. Female words, the more blue the square is. Throughout the text in this app, a 
                                                                \"predominantly Female sentence\" is one in which the proportion of Females mentioned in the 
                                                                sentence was higher than the proportion of Males."),
-                                         plotOutput("gender_waffle",
-                                                    hover = hoverOpts("plot_hover",
-                                                                      delay = 100,
-                                                                      delayType = "debounce")),
-                                         uiOutput("hover_info")
+                                                             plotOutput("gender_waffle",
+                                                                        hover = hoverOpts("plot_hover",
+                                                                                          delay = 100,
+                                                                                          delayType = "debounce")),
+                                                             uiOutput("hover_info")
                                                            )),
-                                         column(12,
-                                                div(
-                                                  style = "position:relative",
-                                                  h3("Which words were associated with predominantly Female, Neutral, and predominantly Male sentences?"),
-                                                  p("The bigger the word, the more often it featured in your text. If your text is very long, only the most 
+                                                    column(12,
+                                                           div(
+                                                             style = "position:relative",
+                                                             h3("Which words were associated with predominantly Female, Neutral, and predominantly Male sentences?"),
+                                                             p("The bigger the word, the more often it featured in your text. If your text is very long, only the most 
                                                     frequent words will be shown. 
                                                     If the wordcloud for any given gender just says \"N/A\", the app didn't classify any sentences as 
                                                     predominantly featuring that gender. As an illustration, if you copy the text from this page 
                                                     into the box, the Male cloud says \"N/A\" because all the sentences are classed as predominantly Female or 
                                                     Neutral."),
-                                                  plotOutput("gender_clouds")
-                                                ))
-                                         ,
-                                         width = 7)),
+                                                    plotOutput("gender_clouds")
+                                                           ))
+                                                    ,
+                                                    width = 7)),
                                   tabPanel("Sentiment analysis", 
                                            h3("Which emotions were associated with the words in the predominantly Female, predominantly Male and 
                                               Neutral sentences?"),
@@ -176,12 +176,22 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                              tags$li("Preaching to Women and Sitting under the Word (Ch. 10), from ", 
                                                      tags$a(href = "https://www.prpbooks.com/book/no-little-women",
                                                             "No Little Women - Aimee Byrd")))),
-                                             h4("With thanks to"),
-                                             p(tags$ul(tags$li("Dr Valerie Hobbs, Aimee Byrd, Andrew Thompson and Mark Magill for their feedback on the prototype"),
-                                                       tags$li("Prof Paul Rayson for providing access to the lists of Male and Female words used by the USAS system")))
-                                           )
-                                           )
+                                           h4("With thanks to"),
+                                           p(tags$ul(tags$li("Dr Valerie Hobbs, Aimee Byrd, Andrew Thompson and Mark Magill for their feedback on the prototype"),
+                                                     tags$li("Prof Paul Rayson for providing access to the lists of Male and Female words used by the USAS system"))),
+                                           h4("And finally... "),
+                                           p(tags$ul(
+                                             tags$li("To report a bug or request a new feature, click on \"New Issue\" ",
+                                                     tags$a(href = "https://github.com/cararthompson/VisualisingMFRepresentation/issues",
+                                                            "here"), "."),
+                                             tags$li("If you found this app useful, please share it with others and reference it using my name (Dr Cara R. Thompson) and
+                                                     the apps's url if you use it in a publication."),
+                                             tags$li("For any other queries, to provide feedback, or to request further bespoke dataviz work, please ",
+                                                     tags$a(href = "https://twitter.com/cararthompson",
+                                                            "get in touch"), "!")))
                                   )
                       )
                     )
                   )
+)
+)
