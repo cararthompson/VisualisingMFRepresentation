@@ -38,9 +38,8 @@ take steps to redress it where necessary.
 
 Sure!
 
-<video controls>
-<iframe width="720" height="480" src="demo/demo.mp4" align="middle" frameborder="0" allowfullscreen>
-</iframe>
+<video autosize: true controls>
+<source src="demo/demo.mp4" type="video/mp4">
 </video>
 
 ## But why?
