@@ -10,10 +10,11 @@ library(ggpol)
 library(ggnewscale)
 library(reshape2)
 library(textdata)
-library(kableExtra)
+library(gt)
 
 # Set up for text analysis
 m_list <- c(tolower(read_table("S2-2_mod.txt", col_names = F)[["X1"]]),
+            # adding pronouns, titles and family 
             "he", "him", "his", "guys?", "m[ae]n", "boys?", "gentlem[ae]n","male","mr",
             "father","son","da", "dad","daddy","husband", "uncle", "nephew", "brother-in-law",
             "brother", "stepbrother", "granpa", "gramps", "grandad", "granda", 
@@ -22,6 +23,7 @@ m_string <- paste0("\\b", paste0(m_list, collapse = "\\b|\\b"), "\\b")
 
 
 f_list <- c(tolower(read_table("S2-1_mod.txt", col_names = F)[["X1"]]),
+            # adding pronouns, titles and family 
             "she","hers?","girls?","wom[ae]n", "lady","ladies","female","mrs", "maid",
             "mother","daughter","mum","ma", "m[ou]mmy","wife", "aunt", "auntie", "niece", 
             "sister", "sister-in-law", "stepsister", "granny", "grandma", "gran", 
