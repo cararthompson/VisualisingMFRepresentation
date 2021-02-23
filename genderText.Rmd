@@ -146,7 +146,7 @@ wordsSentiments <- wordsdf %>%
   inner_join(ncr_tibble) %>%
   group_by(factorG, sentiment) %>%
   mutate(sentiment_count = sum(as.numeric(as.character(n))),
-         word_count_per_SG = paste0(word, " (", n, ")")) %>%
+         word_count_per_SG = paste0(word, " (x", n, ")")) %>%
   ungroup() %>%
   # to order by most used sentiment across all genders
   arrange(desc(sentiment_count)) %>%
@@ -176,11 +176,46 @@ ggplot(filter(wordsSentiments, !is.na(factorS))) +
 
 ```
 
-The table below shows the words associated with each sentiment, in predominantly Male, predominantly Female and Neutral sentences.
+The table below shows the words associated with each sentiment, and how many times each word was used in predominantly Male, predominantly Female and Neutral sentences.
 
 ```{r sentiment_table}
-
-
+wordsSentiments %>%
+  select(sentiment, factorG, associated_words) %>%
+  spread(factorG, associated_words, drop = F) %>%
+  left_join(wordsSentiments %>%
+              select(sentiment, factorG, sentiment_count) %>%
+              spread(factorG, sentiment_count, drop = F),
+            by = "sentiment") %>%
+  rename(`Predominantly Female sentences` = Female.x,
+         `Neutral sentences` = Neutral.x,
+         `Predominantly Male sentences` = Male.x) %>%
+  arrange(desc(Neutral.y)) %>%
+  select(sentiment, `Predominantly Female sentences`,
+         `Neutral sentences`,
+         `Predominantly Male sentences`) %>%
+  gt(groupname_col = NULL, rowname_col = "sentiment") %>%
+  fmt_missing(columns = vars(`Predominantly Female sentences`, 
+                             `Predominantly Male sentences`, 
+                             `Neutral sentences`),
+              missing_text = "-") %>%
+  tab_style(
+    style = cell_fill(color = fColour, alpha = 0.1),
+    locations = cells_body(
+      columns = vars(`Predominantly Female sentences`))) %>%
+  tab_style(
+    style = cell_fill(color = mColour, alpha = 0.1),
+    locations = cells_body(
+      columns = vars(`Predominantly Male sentences`))) %>%
+  tab_style(style = "vertical-align:top",
+            locations = cells_body(columns = vars(sentiment, 
+                                                  `Predominantly Female sentences`, 
+                                                  `Predominantly Male sentences`, 
+                                                  `Neutral sentences`))) %>%  
+  # This doesn't work
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(
+      columns = vars(sentiment)))
 
 ```
 
