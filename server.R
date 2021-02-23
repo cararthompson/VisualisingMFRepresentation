@@ -150,7 +150,7 @@ shinyServer(function(input, output) {
     wordsdf$factorG <- factor(wordsdf$factorG,
                               levels = c("Female", "Neutral", "Male"))
   
-    wordsSentiments <<- wordsdf %>%
+    wordsSentiments <- wordsdf %>%
       inner_join(ncr_tibble) %>%
       group_by(factorG, sentiment) %>%
       mutate(sentiment_count = sum(as.numeric(as.character(n))),

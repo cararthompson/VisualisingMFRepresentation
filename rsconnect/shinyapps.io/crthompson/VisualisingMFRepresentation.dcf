@@ -5,9 +5,9 @@ account: crthompson
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3635465
-bundleId: 4262041
+bundleId: 4262096
 url: https://cararthompson.shinyapps.io/VisualisingMFRepresentation/
-when: 1614093271.86481
+when: 1614094221.62268
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: README.Rmd|S2-1.txt|S2-2.txt|demo/demo.mp4
