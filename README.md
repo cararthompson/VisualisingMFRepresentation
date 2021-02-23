@@ -1,6 +1,5 @@
 Visualising Male and Female Representation in Text
 ================
-Cara Thompson
 
 ## Welcome!
 
