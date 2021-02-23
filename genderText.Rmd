@@ -296,7 +296,7 @@ ggplot(sentiment_sentences) +
 
 ```
 
-## Topic analysis: How did your words cluster into topics, and what type of sentences did they feature in?"
+## Topic analysis: How did your words cluster into topics, and what type of sentences did they feature in?
 
 Using Latent Dirichlet allocation (LDA), one of the most widely used algorithms for topic modelling, this section presents a series of wordclouds of the top 10 words in each word cluster (topic) in your text. The number of clusters comes from the number of topics you selected in the dropdown menu. You selected `r params$n_topics` topics. 
 
@@ -368,6 +368,6 @@ doc_lda_tibble %>% inner_join(wordsdf) %>%
          size = F)
 ```
 
-Thank you for using the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/GenderRep/). I hope you found it useful!
+Thank you for using the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/VisualisingMFRepresentation/). I hope you found it useful! For further reading, information on how to report a bug or request a new feature, and guidance on referencing the app in a publication, please refer to the "Resources" tab in the app. 
 
 Cara Thompson (twitter: @cararthompson)
