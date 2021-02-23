@@ -161,8 +161,7 @@ ggplot(filter(wordsSentiments, !is.na(factorS))) +
                     values=c(fColour, mColour, "grey48")) +
   geom_col(inherit.aes = F, data = wordsSentiments,
            aes(x = fct_rev(factorS), y = sentiment_count, 
-               fill = factorG,
-               text = paste0("Associated word(s):<br>", associated_words)), 
+               fill = factorG), 
            show.legend = F) +
   scale_x_discrete() +
   coord_flip() +
@@ -180,42 +179,56 @@ The table below shows the words associated with each sentiment, and how many tim
 
 ```{r sentiment_table}
 wordsSentiments %>%
+  mutate(associated_words = paste0("*Sentiment score = ", sentiment_count, "*",
+                                   "<br>", associated_words)) %>%
   select(sentiment, factorG, associated_words) %>%
   spread(factorG, associated_words, drop = F) %>%
   left_join(wordsSentiments %>%
               select(sentiment, factorG, sentiment_count) %>%
               spread(factorG, sentiment_count, drop = F),
             by = "sentiment") %>%
-  rename(`Predominantly Female sentences` = Female.x,
-         `Neutral sentences` = Neutral.x,
-         `Predominantly Male sentences` = Male.x) %>%
+  rename(`Predominantly Female` = Female.x,
+         `Neutral` = Neutral.x,
+         `Predominantly Male` = Male.x) %>%
   arrange(desc(Neutral.y)) %>%
-  select(sentiment, `Predominantly Female sentences`,
-         `Neutral sentences`,
-         `Predominantly Male sentences`) %>%
+  select(sentiment, `Predominantly Female`,
+         `Neutral`,
+         `Predominantly Male`) %>%
   gt(groupname_col = NULL, rowname_col = "sentiment") %>%
-  fmt_missing(columns = vars(`Predominantly Female sentences`, 
-                             `Predominantly Male sentences`, 
-                             `Neutral sentences`),
-              missing_text = "-") %>%
+  fmt_missing(columns = vars(`Predominantly Female`, 
+                             `Predominantly Male`, 
+                             `Neutral`),
+              missing_text = " - ") %>%
+  fmt_markdown(columns = TRUE) %>%
+  tab_stubhead(label = "Sentiment") %>%
   tab_style(
-    style = cell_fill(color = fColour, alpha = 0.1),
+    style = cell_fill(color = fColour, alpha = 0.15),
     locations = cells_body(
-      columns = vars(`Predominantly Female sentences`))) %>%
+      columns = vars(`Predominantly Female`))) %>%
   tab_style(
-    style = cell_fill(color = mColour, alpha = 0.1),
+    style = cell_fill(color = "grey45", alpha = 0.1),
     locations = cells_body(
-      columns = vars(`Predominantly Male sentences`))) %>%
+      columns = vars(`Neutral`))) %>%
+  tab_style(
+    style = cell_fill(color = mColour, alpha = 0.15),
+    locations = cells_body(
+      columns = vars(`Predominantly Male`))) %>%
   tab_style(style = "vertical-align:top",
             locations = cells_body(columns = vars(sentiment, 
-                                                  `Predominantly Female sentences`, 
-                                                  `Predominantly Male sentences`, 
-                                                  `Neutral sentences`))) %>%  
-  # This doesn't work
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_body(
-      columns = vars(sentiment)))
+                                                  `Predominantly Female`, 
+                                                  `Predominantly Male`, 
+                                                  `Neutral`))) %>%
+  tab_style(style = "vertical-align:top",
+            locations = cells_stub()) %>%
+  tab_spanner(
+    label = "Sentence group",
+    columns = vars(`Predominantly Female`, `Neutral`,
+                   `Predominantly Male`)) %>%
+  cols_width(
+    vars(`Predominantly Female`, 
+         `Predominantly Male`, 
+         `Neutral`) ~ px(400))
+
 
 ```
 
@@ -292,8 +305,8 @@ These wordclouds also allow you to explore gender balance in the topics, by colo
 ```{r,echo=FALSE}
 n_topics <- ifelse(params$n_topics != "NA",
                    as.numeric(as.character(params$n_topics)),
-                   # setting arbitrarily, they can change it 
-                   # according to what comes out
+                   # setting arbitrarily, users can change it 
+                   # according to what the initial plots show
                    3)
 topic_fig_height <- ceiling(n_topics/2 * 4.5)
 ```
