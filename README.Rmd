@@ -25,10 +25,8 @@ The aim is not to force a perfect balance (there may be a perfectly valid reason
 ## Can we see a demo?
 
 Sure!
- 
-<video autosize: true controls>
-<source src="demo/demo.mp4" type="video/mp4">
-</video>
+
+<img src="demo/demo.gif" align="center"/>
 
 ## But why?
 

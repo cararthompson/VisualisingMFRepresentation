@@ -38,9 +38,7 @@ take steps to redress it where necessary.
 
 Sure!
 
-<video autosize: true controls>
-<source src="demo/demo.mp4" type="video/mp4">
-</video>
+<img src="demo/demo.gif" align="center"/>
 
 ## But why?
 
