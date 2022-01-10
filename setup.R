@@ -1,13 +1,4 @@
-# Aux functions and library set up for the ap
-
-## Example text outside of App
-# input <- list()
-# input$extract <- "He was there and did blah. She was also! They were happy...
-# She gave him their joint gift. Hurrah! She laughed. What would happen next? Who knows.
-# He said this, he said that, he did blah. She laughed again.
-# She, her, hers, him.
-# The guys did X. The girls didn't Y. The men and women chatted together. She was super happy. He was very depressed"
-
+# Aux functions and library set up for the app
 
 # Load packages
 library(tidyverse)
@@ -19,9 +10,11 @@ library(ggpol)
 library(ggnewscale)
 library(reshape2)
 library(textdata)
+library(gt)
 
 # Set up for text analysis
 m_list <- c(tolower(read_table("S2-2_mod.txt", col_names = F)[["X1"]]),
+            # adding pronouns, titles and family 
             "he", "him", "his", "guys?", "m[ae]n", "boys?", "gentlem[ae]n","male","mr",
             "father","son","da", "dad","daddy","husband", "uncle", "nephew", "brother-in-law",
             "brother", "stepbrother", "granpa", "gramps", "grandad", "granda", 
@@ -30,6 +23,7 @@ m_string <- paste0("\\b", paste0(m_list, collapse = "\\b|\\b"), "\\b")
 
 
 f_list <- c(tolower(read_table("S2-1_mod.txt", col_names = F)[["X1"]]),
+            # adding pronouns, titles and family 
             "she","hers?","girls?","wom[ae]n", "lady","ladies","female","mrs", "maid",
             "mother","daughter","mum","ma", "m[ou]mmy","wife", "aunt", "auntie", "niece", 
             "sister", "sister-in-law", "stepsister", "granny", "grandma", "gran", 

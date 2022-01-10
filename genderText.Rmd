@@ -146,7 +146,7 @@ wordsSentiments <- wordsdf %>%
   inner_join(ncr_tibble) %>%
   group_by(factorG, sentiment) %>%
   mutate(sentiment_count = sum(as.numeric(as.character(n))),
-         word_count_per_SG = paste0(word, " (", n, ")")) %>%
+         word_count_per_SG = paste0(word, " (x", n, ")")) %>%
   ungroup() %>%
   # to order by most used sentiment across all genders
   arrange(desc(sentiment_count)) %>%
@@ -161,8 +161,7 @@ ggplot(filter(wordsSentiments, !is.na(factorS))) +
                     values=c(fColour, mColour, "grey48")) +
   geom_col(inherit.aes = F, data = wordsSentiments,
            aes(x = fct_rev(factorS), y = sentiment_count, 
-               fill = factorG,
-               text = paste0("Associated word(s):<br>", associated_words)), 
+               fill = factorG), 
            show.legend = F) +
   scale_x_discrete() +
   coord_flip() +
@@ -176,10 +175,59 @@ ggplot(filter(wordsSentiments, !is.na(factorS))) +
 
 ```
 
-The table below shows the words associated with each sentiment, in predominantly Male, predominantly Female and Neutral sentences.
+The table below shows the words associated with each sentiment, and how many times each word was used in predominantly Male, predominantly Female and Neutral sentences.
 
 ```{r sentiment_table}
-
+wordsSentiments %>%
+  mutate(associated_words = paste0("*Sentiment score = ", sentiment_count, "*",
+                                   "<br>", associated_words)) %>%
+  select(sentiment, factorG, associated_words) %>%
+  spread(factorG, associated_words, drop = F) %>%
+  left_join(wordsSentiments %>%
+              select(sentiment, factorG, sentiment_count) %>%
+              spread(factorG, sentiment_count, drop = F),
+            by = "sentiment") %>%
+  rename(`Predominantly Female` = Female.x,
+         `Neutral` = Neutral.x,
+         `Predominantly Male` = Male.x) %>%
+  arrange(desc(Neutral.y)) %>%
+  select(sentiment, `Predominantly Female`,
+         `Neutral`,
+         `Predominantly Male`) %>%
+  gt(groupname_col = NULL, rowname_col = "sentiment") %>%
+  fmt_missing(columns = vars(`Predominantly Female`, 
+                             `Predominantly Male`, 
+                             `Neutral`),
+              missing_text = " - ") %>%
+  fmt_markdown(columns = TRUE) %>%
+  tab_stubhead(label = "Sentiment") %>%
+  tab_style(
+    style = cell_fill(color = fColour, alpha = 0.15),
+    locations = cells_body(
+      columns = vars(`Predominantly Female`))) %>%
+  tab_style(
+    style = cell_fill(color = "grey45", alpha = 0.1),
+    locations = cells_body(
+      columns = vars(`Neutral`))) %>%
+  tab_style(
+    style = cell_fill(color = mColour, alpha = 0.15),
+    locations = cells_body(
+      columns = vars(`Predominantly Male`))) %>%
+  tab_style(style = "vertical-align:top",
+            locations = cells_body(columns = vars(sentiment, 
+                                                  `Predominantly Female`, 
+                                                  `Predominantly Male`, 
+                                                  `Neutral`))) %>%
+  tab_style(style = "vertical-align:top",
+            locations = cells_stub()) %>%
+  tab_spanner(
+    label = "Sentence group",
+    columns = vars(`Predominantly Female`, `Neutral`,
+                   `Predominantly Male`)) %>%
+  cols_width(
+    vars(`Predominantly Female`, 
+         `Predominantly Male`, 
+         `Neutral`) ~ px(400))
 
 
 ```
@@ -248,7 +296,7 @@ ggplot(sentiment_sentences) +
 
 ```
 
-## Topic analysis: How did your words cluster into topics, and what type of sentences did they feature in?"
+## Topic analysis: How did your words cluster into topics, and what type of sentences did they feature in?
 
 Using Latent Dirichlet allocation (LDA), one of the most widely used algorithms for topic modelling, this section presents a series of wordclouds of the top 10 words in each word cluster (topic) in your text. The number of clusters comes from the number of topics you selected in the dropdown menu. You selected `r params$n_topics` topics. 
 
@@ -257,8 +305,8 @@ These wordclouds also allow you to explore gender balance in the topics, by colo
 ```{r,echo=FALSE}
 n_topics <- ifelse(params$n_topics != "NA",
                    as.numeric(as.character(params$n_topics)),
-                   # setting arbitrarily, they can change it 
-                   # according to what comes out
+                   # setting arbitrarily, users can change it 
+                   # according to what the initial plots show
                    3)
 topic_fig_height <- ceiling(n_topics/2 * 4.5)
 ```
@@ -320,6 +368,6 @@ doc_lda_tibble %>% inner_join(wordsdf) %>%
          size = F)
 ```
 
-Thank you for using the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/GenderRep/). I hope you found it useful!
+Thank you for using the [Visualising Male and Female Representation in Text app](https://cararthompson.shinyapps.io/VisualisingMFRepresentation/). I hope you found it useful! For further reading, information on how to report a bug or request a new feature, and guidance on referencing the app in a publication, please refer to the "Resources" tab in the app. 
 
 Cara Thompson (twitter: @cararthompson)
